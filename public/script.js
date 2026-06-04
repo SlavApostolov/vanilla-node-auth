@@ -48,3 +48,43 @@ registerForm.addEventListener('submit', async (e) => {
         regMessage.textContent = "Failed to connect to the server.";
     }
 });
+
+const loginForm = document.getElementById('loginForm');
+const loginMessage = document.getElementById('login-message');
+
+loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+
+    loginMessage.textContent = "Loading...";
+    loginMessage.style.color = "black";
+
+    const payload = {
+        email: document.getElementById('login-email').value,
+        password: document.getElementById('login-password').value
+    };
+
+    try {
+        const response = await fetch('http://127.0.0.1:3000/api/login', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            loginMessage.style.color = "green";
+            loginMessage.textContent = `Welcome, ${data.user.names}`;
+            loginForm.reset();
+        } else {
+            loginMessage.style.color = "red";
+            loginMessage.textContent = "Error: " + data.error;
+        }
+    } catch (error) {
+        console.error(error);
+        loginMessage.style.color = "red";
+        loginMessage.textContent = "Failed to connect to the server.";
+    }
+});
