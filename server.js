@@ -119,6 +119,12 @@ const server = http.createServer(async (req, res) => {
                 res.end(JSON.stringify({ error: 'Internal Server Error' }));
             }
         });
+    } else if (req.url === '/api/captcha' && req.method === 'GET') {
+        const text = generateCaptcha();
+        const svgImage = createCaptchaImage(text);
+
+        res.writeHead(200, { 'Content-Type': 'image/svg+xml' });
+        res.end(svgImage);
     } else {
         res.writeHead(404, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ error: 'Route not found' }));
@@ -129,3 +135,38 @@ const PORT = 3000;
 server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
+
+function generateCaptcha() {
+    const alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+    let captcha = '';
+
+    for (i = 0; i < 6; i++) {
+        var randomIndex = Math.floor(Math.random() * alpha.length);
+        captcha += alpha[randomIndex];
+    }
+    return captcha;
+};
+
+function createCaptchaImage(text) {
+    let svg = `<svg width="160" height="50" xmlns="http://www.w3.org/2000/svg">`;
+
+    svg += `<rect width="100%" height="100%" fill="#eeeeee"/>`;
+
+    for (let i = 0; i < 5; i++) {
+        const x1 = Math.random() * 160;
+        const y1 = Math.random() * 50;
+        const x2 = Math.random() * 160;
+        const y2 = Math.random() * 50;
+        svg += `<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#888888" stroke-width="2"/>`;
+    }
+
+    for (let i = 0; i < text.length; i++) {
+        const x = 20 + (i * 20);
+        const y = 30 + (Math.random() * 10);
+        const rotation = (Math.random() - 0.5) * 40;
+
+        svg += `<text x="${x}" y="${y}" transform="rotate(${rotation}, ${x}, ${y})" font-family="monospace" font-size="24" font-weight="bold" fill="#333333" >${text[i]}</text>`;
+    }
+    svg += `</svg>`;
+    return svg;
+}
