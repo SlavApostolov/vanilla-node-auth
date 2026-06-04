@@ -1,6 +1,7 @@
 const http = require('http');
 const { Pool } = require('pg');
 const crypto = require('crypto');
+const captchaSessions = new Map();
 
 const pool = new Pool({
     user: 'postgres',
@@ -34,12 +35,38 @@ const server = http.createServer(async (req, res) => {
         req.on('end', async () => {
             try {
                 const parsedData = JSON.parse(body);
-                const { names, email, password } = parsedData;
+                const { names, email, password, captchaAnswer } = parsedData;
 
                 if (!names || !email || !password) {
                     res.writeHead(400, { 'Content-Type': 'application/json' });
                     return res.end(JSON.stringify({ error: 'All fields are required' }));
                 }
+
+                const cookieHeader = req.headers.cookie;
+                let userSessionId = null;
+
+                if (cookieHeader) {
+                    const cookies = cookieHeader.split(';');
+                    for (let cookie of cookies) {
+                        if (cookie.trim().startsWith('captcha_session=')) {
+                            userSessionId = cookie.trim().split('=')[1];
+                        }
+                    }
+                }
+
+                if (!userSessionId || !captchaSessions.has(userSessionId)) {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    return res.end(JSON.stringify({ error: 'Captcha session expired or missing' }));
+                }
+
+                const correctCaptchaText = captchaSessions.get(userSessionId);
+
+                if (!captchaAnswer || captchaAnswer.toLowerCase() !== correctCaptchaText) {
+                    res.writeHead(400, { 'Content-Type': 'application/json' });
+                    return res.end(JSON.stringify({ error: 'Incorrect CAPTCHA code' }));
+                }
+
+                captchaSessions.delete(userSessionId);
 
                 const salt = crypto.randomBytes(16).toString('hex');
                 const hashedPassword = crypto.scryptSync(password, salt, 64).toString('hex');
@@ -123,7 +150,15 @@ const server = http.createServer(async (req, res) => {
         const text = generateCaptcha();
         const svgImage = createCaptchaImage(text);
 
-        res.writeHead(200, { 'Content-Type': 'image/svg+xml' });
+        const sessionId = crypto.randomBytes(16).toString('hex');
+        captchaSessions.set(sessionId, text.toLocaleLowerCase());
+
+        console.log(`[DEBUG] Generated CAPTCHA: "${text}" for session: ${sessionId}`);
+
+        res.writeHead(200, {
+            'Content-Type': 'image/svg+xml',
+            'Set-Cookie': `captcha_session=${sessionId}; HttpOnly; Path=/`
+        });
         res.end(svgImage);
     } else {
         res.writeHead(404, { 'Content-Type': 'application/json' });
@@ -140,7 +175,7 @@ function generateCaptcha() {
     const alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let captcha = '';
 
-    for (i = 0; i < 6; i++) {
+    for (let i = 0; i < 6; i++) {
         var randomIndex = Math.floor(Math.random() * alpha.length);
         captcha += alpha[randomIndex];
     }
