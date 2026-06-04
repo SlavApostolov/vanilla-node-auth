@@ -178,6 +178,60 @@ const server = http.createServer(async (req, res) => {
         });
 
         res.end(JSON.stringify({ message: 'Logged out successuflly' }));
+
+    } else if (req.url === '/api/update' && req.method === 'POST') {
+        const cookieHeader = req.headers.cookie;
+        let userSessionId = null;
+
+        if (cookieHeader) {
+            const cookie = cookieHeader.split(';');
+            for (let cookie of cookies) {
+                if (cookie.trim().startsWith('auth_session')) {
+                    userSessionId = cookie.trim().split('=')[1];
+                }
+            }
+        }
+
+        if (!userSessionId || !activeSessions.has(userSessionId)) {
+            res.writeHead(401, { 'Content-Type': 'application/json' });
+            return res.end(JSON.stringify({ error: 'Unauthorized. Please log in first.' }))
+        }
+
+        const userId = activeSessions.get(userSessionId);
+
+        let body = '';
+        req.on('data', chunk => {
+            body += chunk.toString();
+        });
+
+        req.on('end', async () => {
+            try {
+                const parsedData = JSON.parse(body);
+                const { newName, newPassword } = parsedData;
+
+                if (!newName || !newPassword) {
+                    res.writeHead(400, { 'Content-Type': 'application/json' })
+                    return res.end(JSON.stringify({ error: 'Name and new password are required' }))
+                }
+
+                const salt = crypto.randomBytes(16).toString('hex');
+                const hashedPassword = crypto.scryptSync(newPassword, salt, 64).toString('hex');
+                const finalPasswordString = `${salt}:${hashedPassword}`;
+
+                const updateQuery = 'UPDATE users SET names = $1, password = $2 WHERE id = $3';
+                await pool.query(updateQuery, [newName, finalPasswordString, userId]);
+
+                res.writeHead(200, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ message: 'Profile updated successfully!' }));
+
+            } catch (error) {
+
+                console.error(error);
+                res.writeHead(500, { 'Content-Type': 'application/json' });
+                res.end(JSON.stringify({ error: 'Internal Server Error' }));
+            }
+        });
+
     } else if (req.url === '/api/captcha' && req.method === 'GET') {
         const text = generateCaptcha();
         const svgImage = createCaptchaImage(text);
