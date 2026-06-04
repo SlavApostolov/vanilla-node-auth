@@ -2,6 +2,7 @@ const http = require('http');
 const { Pool } = require('pg');
 const crypto = require('crypto');
 const captchaSessions = new Map();
+const activeSessions = new Map();
 
 const pool = new Pool({
     user: 'postgres',
@@ -128,7 +129,14 @@ const server = http.createServer(async (req, res) => {
                 const candidateHash = crypto.scryptSync(password, salt, 64).toString('hex');
 
                 if (candidateHash === storedHash) {
-                    res.writeHead(200, { 'Content-Type': 'application/json' });
+                    const loginSessionId = crypto.randomBytes(16).toString('hex');
+                    activeSessions.set(loginSessionId, user.id);
+
+                    res.writeHead(200, {
+                        'Content-Type': 'application/json',
+                        'Set-Cookie': `auth_session=${loginSessionId}; HttpOnly; Path=/`
+                    });
+
                     res.end(JSON.stringify({
                         message: 'Login successful',
                         user: {
@@ -147,6 +155,29 @@ const server = http.createServer(async (req, res) => {
                 res.end(JSON.stringify({ error: 'Internal Server Error' }));
             }
         });
+    } else if (req.url === '/api/logout' && req.method === 'POST') {
+        const cookieHeader = req.headers.cookies;
+        let userSessionId = null;
+
+        if (cookieHeader) {
+            const cookies = cookieHeader.split(';')
+            for (let cookie of cookies) {
+                if (cookie.trim().startsWith('auth_session=')) {
+                    userSessionId = cookie.trim().split('=')[1];
+                }
+            }
+        }
+
+        if (userSessionId) {
+            activeSessions.delete(userSessionId);
+        }
+
+        res.writeHead(200, {
+            'Content-Type': 'application/json',
+            'Set-Cookie': 'auth_session=; HttpOnly; Path=/; Expires=Thu, 01 Jan 1970 00:00:00 GMT'
+        });
+
+        res.end(JSON.stringify({ message: 'Logged out successuflly' }));
     } else if (req.url === '/api/captcha' && req.method === 'GET') {
         const text = generateCaptcha();
         const svgImage = createCaptchaImage(text);
