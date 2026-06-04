@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Secure Auth System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <section class="form-section">
+            <h2>Create an Account</h2>
+            <form id="registerForm">
+                <input type="text" id="reg-names" placeholder="Full Name" required>
+                <input type="email" id="reg-email" placeholder="Email Address" required>
+                <input type="password" id="reg-password" placeholder="Password" required>
+
+                <div class="captcha-box">
+                    <img src="http://127.0.0.1:3000/api/captcha" id="captchaImage" alt="Security CAPTCHA">
+                    <button type="button" id="reloadCaptcha" title="Reload CAPTCHA">↻</button>
+                </div>
+                <input type="text" id="reg-captcha" placeholder="Type the 6 letters above" required autocomplete="off">
+
+                <button type="submit">Register</button>
+            </form>
+            <div id="reg-message" class="message-box"></div>
+        </section>
+
+        <hr>
+
+        <section class="form-section">
+            <h2>Login</h2>
+            <form id="loginForm">
+                <input type="email" id="login-email" placeholder="Email Address" required>
+                <input type="password" id="login-password" placeholder="Password" required>
+
+                <button type="submit">Login</button>
+            </form>
+            <div id="login-message" class="message-box"></div>
+        </section>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
