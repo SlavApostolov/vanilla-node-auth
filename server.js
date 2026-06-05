@@ -233,7 +233,7 @@ const server = http.createServer(async (req, res) => {
             }
         });
 
-    } else if (req.url === '/api/captcha' && req.method === 'GET') {
+    } else if (req.url.startsWith('/api/captcha') && req.method === 'GET') {
         const text = generateCaptcha();
         const svgImage = createCaptchaImage(text);
 

@@ -13,14 +13,14 @@ const regMessage = document.getElementById('reg-message');
 const captchaImage = document.getElementById('captchaImage');
 const reloadCaptchaBtn = document.getElementById('reloadCaptcha');
 
-const upadateForm = document.getElementById('updateForm');
+const updateForm = document.getElementById('updateForm');
 const updateMessage = document.getElementById('update-message');
 
 const logoutBtn = document.getElementById('logoutBtn');
 const logoutMessage = document.getElementById('logout-message');
 
 reloadCaptchaBtn.addEventListener('click', () => {
-    captchaImage.src = `http://127.0.0.1:3000/api/captcha?time=${Date.now()}`;
+    captchaImage.src = `http://127.0.0.1:3000/api/captcha?t=${Date.now()}`;
 });
 
 registerForm.addEventListener('submit', async (e) => {
