@@ -110,7 +110,6 @@ updateForm.addEventListener('submit', async (e) => {
         const response = await fetch('http://127.0.0.1:3000/api/update', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            // CRITICAL: Send the auth_session cookie to prove who we are!
             credentials: 'include',
             body: JSON.stringify(payload)
         });
@@ -136,7 +135,6 @@ logoutBtn.addEventListener('click', async () => {
     try {
         const response = await fetch('http://127.0.0.1:3000/api/logout', {
             method: 'POST',
-            // CRITICAL: Send the cookie so the server knows which session to destroy!
             credentials: 'include'
         });
 
@@ -146,7 +144,6 @@ logoutBtn.addEventListener('click', async () => {
             logoutMessage.style.color = "green";
             logoutMessage.textContent = data.message;
 
-            // Optional: Clear out any previous success messages
             document.getElementById('login-message').textContent = '';
             document.getElementById('update-message').textContent = '';
         } else {

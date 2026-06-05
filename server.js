@@ -257,16 +257,16 @@ server.listen(PORT, () => {
     console.log(`Server is running on port ${PORT}`);
 });
 
-function generateCaptcha() {
-    const alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let captcha = '';
+// function generateCaptcha() {
+//     const alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+//     let captcha = '';
 
-    for (let i = 0; i < 6; i++) {
-        var randomIndex = Math.floor(Math.random() * alpha.length);
-        captcha += alpha[randomIndex];
-    }
-    return captcha;
-};
+//     for (let i = 0; i < 6; i++) {
+//         var randomIndex = Math.floor(Math.random() * alpha.length);
+//         captcha += alpha[randomIndex];
+//     }
+//     return captcha;
+// };
 
 function createCaptchaImage(text) {
     let svg = `<svg width="160" height="50" xmlns="http://www.w3.org/2000/svg">`;
@@ -291,3 +291,5 @@ function createCaptchaImage(text) {
     svg += `</svg>`;
     return svg;
 }
+
+const { generateCaptcha } = require('./utils.js');
