@@ -184,7 +184,7 @@ const server = http.createServer(async (req, res) => {
         let userSessionId = null;
 
         if (cookieHeader) {
-            const cookie = cookieHeader.split(';');
+            const cookies = cookieHeader.split(';');
             for (let cookie of cookies) {
                 if (cookie.trim().startsWith('auth_session')) {
                     userSessionId = cookie.trim().split('=')[1];

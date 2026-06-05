@@ -3,6 +3,12 @@ const regMessage = document.getElementById('reg-message');
 const captchaImage = document.getElementById('captchaImage');
 const reloadCaptchaBtn = document.getElementById('reloadCaptcha');
 
+const upadateForm = document.getElementById('updateForm');
+const updateMessage = document.getElementById('update-message');
+
+const logoutBtn = document.getElementById('logoutBtn');
+const logoutMessage = document.getElementById('logout-message');
+
 reloadCaptchaBtn.addEventListener('click', () => {
     captchaImage.src = `http://127.0.0.1:3000/api/captcha?time=${Date.now()}`;
 });
@@ -87,5 +93,69 @@ loginForm.addEventListener('submit', async (e) => {
         console.error(error);
         loginMessage.style.color = "red";
         loginMessage.textContent = "Failed to connect to the server.";
+    }
+});
+
+updateForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    updateMessage.textContent = "Updating...";
+    updateMessage.style.color = "black";
+
+    const payload = {
+        newName: document.getElementById('update-names').value,
+        newPassword: document.getElementById('update-password').value
+    };
+
+    try {
+        const response = await fetch('http://127.0.0.1:3000/api/update', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            // CRITICAL: Send the auth_session cookie to prove who we are!
+            credentials: 'include',
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            updateMessage.style.color = "green";
+            updateMessage.textContent = "Success: " + data.message;
+            updateForm.reset();
+        } else {
+            updateMessage.style.color = "red";
+            updateMessage.textContent = "Error: " + data.error;
+        }
+    } catch (error) {
+        console.error(error);
+        updateMessage.style.color = "red";
+        updateMessage.textContent = "Failed to connect to the server.";
+    }
+});
+
+logoutBtn.addEventListener('click', async () => {
+    try {
+        const response = await fetch('http://127.0.0.1:3000/api/logout', {
+            method: 'POST',
+            // CRITICAL: Send the cookie so the server knows which session to destroy!
+            credentials: 'include'
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            logoutMessage.style.color = "green";
+            logoutMessage.textContent = data.message;
+
+            // Optional: Clear out any previous success messages
+            document.getElementById('login-message').textContent = '';
+            document.getElementById('update-message').textContent = '';
+        } else {
+            logoutMessage.style.color = "red";
+            logoutMessage.textContent = "Error: " + data.error;
+        }
+    } catch (error) {
+        console.error(error);
+        logoutMessage.style.color = "red";
+        logoutMessage.textContent = "Failed to logout.";
     }
 });
