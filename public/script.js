@@ -1,3 +1,13 @@
+document.addEventListener('DOMContentLoaded', () => {
+    const savedUser = localStorage.getItem('currentUser');
+
+    if (savedUser) {
+        document.getElementById('auth-view').style.display = 'none';
+        document.getElementById('profile-view').style.display = 'block';
+        document.getElementById('welcome-heading').textContent = `Welcome back, ${savedUser}!`
+    }
+})
+
 const registerForm = document.getElementById('registerForm');
 const regMessage = document.getElementById('reg-message');
 const captchaImage = document.getElementById('captchaImage');
@@ -82,9 +92,14 @@ loginForm.addEventListener('submit', async (e) => {
         const data = await response.json();
 
         if (response.ok) {
-            loginMessage.style.color = "green";
-            loginMessage.textContent = `Welcome, ${data.user.names}`;
+            localStorage.setItem('currentUser', data.user.names);
+
+            document.getElementById('auth-view').style.display = 'none';
+            document.getElementById('profile-view').style.display = 'block'
+            document.getElementById('welcome-heading').textContent = `Welcome back, ${data.user.names}`
+
             loginForm.reset();
+            loginMessage.textContent = ``;
         } else {
             loginMessage.style.color = "red";
             loginMessage.textContent = "Error: " + data.error;
@@ -141,11 +156,14 @@ logoutBtn.addEventListener('click', async () => {
         const data = await response.json();
 
         if (response.ok) {
-            logoutMessage.style.color = "green";
-            logoutMessage.textContent = data.message;
+            localStorage.removeItem('currentUser');
 
-            document.getElementById('login-message').textContent = '';
+            document.getElementById('profile-view').style.display = 'none';
+            document.getElementById('auth-view').style.display = 'block';
+
             document.getElementById('update-message').textContent = '';
+            logoutMessage.textContent = '';
+            document.getElementById('reloadCaptcha').click();
         } else {
             logoutMessage.style.color = "red";
             logoutMessage.textContent = "Error: " + data.error;

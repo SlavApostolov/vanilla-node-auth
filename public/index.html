@@ -12,52 +12,61 @@
 
     <div class="container">
 
-        <section class="form-section">
-            <h2>Create an Account</h2>
-            <form id="registerForm">
-                <input type="text" id="reg-names" placeholder="Full Name" required>
-                <input type="email" id="reg-email" placeholder="Email Address" required>
-                <input type="password" id="reg-password" placeholder="Password" required>
+        <div id="auth-view">
+            <section class="form-section">
+                <h2>Create an Account</h2>
+                <form id="registerForm">
+                    <input type="text" id="reg-names" placeholder="Full Name" required>
+                    <input type="email" id="reg-email" placeholder="Email Address" required>
+                    <input type="password" id="reg-password" placeholder="Password" required>
 
-                <div class="captcha-box">
-                    <img src="http://127.0.0.1:3000/api/captcha" id="captchaImage" alt="Security CAPTCHA">
-                    <button type="button" id="reloadCaptcha" title="Reload CAPTCHA">↻</button>
-                </div>
-                <input type="text" id="reg-captcha" placeholder="Type the 6 letters above" required autocomplete="off">
+                    <div class="captcha-box">
+                        <img src="http://127.0.0.1:3000/api/captcha" id="captchaImage" alt="Security CAPTCHA">
+                        <button type="button" id="reloadCaptcha" title="Reload CAPTCHA">↻</button>
+                    </div>
+                    <input type="text" id="reg-captcha" placeholder="Type the 6 letters above" required
+                        autocomplete="off">
 
-                <button type="submit">Register</button>
-            </form>
-            <div id="reg-message" class="message-box"></div>
-        </section>
+                    <button type="submit">Register</button>
+                </form>
+                <div id="reg-message" class="message-box"></div>
+            </section>
 
-        <hr>
+            <hr>
 
-        <section class="form-section">
-            <h2>Login</h2>
-            <form id="loginForm">
-                <input type="email" id="login-email" placeholder="Email Address" required>
-                <input type="password" id="login-password" placeholder="Password" required>
+            <section class="form-section">
+                <h2>Login</h2>
+                <form id="loginForm">
+                    <input type="email" id="login-email" placeholder="Email Address" required>
+                    <input type="password" id="login-password" placeholder="Password" required>
 
-                <button type="submit">Login</button>
-            </form>
-            <div id="login-message" class="message-box"></div>
-        </section>
+                    <button type="submit">Login</button>
+                </form>
+                <div id="login-message" class="message-box"></div>
+            </section>
 
-        <hr>
+        </div>
 
-        <section class="form-section">
-            <h2>Your Profile</h2>
-            <form id="updateForm">
-                <input type="text" id="update-names" placeholder="New Full Name" required>
-                <input type="password" id="update-password" placeholder="New Password" required>
+        <div id="profile-view" style="display: none;">
 
-                <button type="submit">Update Profile</button>
-            </form>
-            <div id="update-message" class="message-box"></div>
+            <h2 id="welcome-heading">Welcome!</h2>
+            <hr>
 
-            <button id="logoutBtn" style="background-color: #e74c3c; margin-top: 15px;">Logout</button>
-            <div id="logout-message" class="message-box"></div>
-        </section>
+            <section class="form-section">
+                <h2>Your Profile</h2>
+                <form id="updateForm">
+                    <input type="text" id="update-names" placeholder="New Full Name" required>
+                    <input type="password" id="update-password" placeholder="New Password" required>
+
+                    <button type="submit">Update Profile</button>
+                </form>
+                <div id="update-message" class="message-box"></div>
+
+                <button id="logoutBtn" style="background-color: #e74c3c; margin-top: 15px;">Logout</button>
+                <div id="logout-message" class="message-box"></div>
+            </section>
+
+        </div>
 
     </div>
 
