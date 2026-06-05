@@ -1,3 +1,5 @@
+const crypto = require('crypto')
+
 function generateCaptcha() {
     const alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let captcha = '';
@@ -9,4 +11,17 @@ function generateCaptcha() {
     return captcha;
 };
 
-module.exports = { generateCaptcha };
+function hashPassword(plainTextPassword) {
+    const salt = crypto.randomBytes(16).toString('hex');
+    const hashedPassword = crypto.scryptSync(plainTextPassword, salt, 64).toString('hex');
+    return `${salt}:${hashedPassword}`;
+}
+
+function verifyPassword(plainTextPassword, storedPasswordString) {
+    const [salt, storedHash] = storedPasswordString.split(':');
+    const candidateHash = crypto.scryptSync(plainTextPassword, salt, 64).toString('hex');
+    return candidateHash === storedHash;
+}
+
+
+module.exports = { generateCaptcha, hashPassword, verifyPassword };
