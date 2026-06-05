@@ -70,16 +70,18 @@ const server = http.createServer(async (req, res) => {
 
                 captchaSessions.delete(userSessionId);
 
-                const salt = crypto.randomBytes(16).toString('hex');
-                const hashedPassword = crypto.scryptSync(password, salt, 64).toString('hex');
-                const finalPasswordSring = `${salt}:${hashedPassword}`;
+                // const salt = crypto.randomBytes(16).toString('hex');
+                // const hashedPassword = crypto.scryptSync(password, salt, 64).toString('hex');
+                // const finalPasswordSring = `${salt}:${hashedPassword}`;
+
+                const finalPasswordString = hashPassword(password);
 
                 const insertQuery = `
                 INSERT INTO users (names, email, password)
                 VALUES ($1, $2, $3) RETURNING id
                 `;
 
-                const values = [names, email, finalPasswordSring];
+                const values = [names, email, finalPasswordString];
 
                 const dbResult = await pool.query(insertQuery, values);
 
@@ -124,11 +126,9 @@ const server = http.createServer(async (req, res) => {
 
                 const user = dbResult.rows[0];
 
-                const [salt, storedHash] = user.password.split(':');
+                const isMatch = verifyPassword(password, user.password);
 
-                const candidateHash = crypto.scryptSync(password, salt, 64).toString('hex');
-
-                if (candidateHash === storedHash) {
+                if (isMatch) {
                     const loginSessionId = crypto.randomBytes(16).toString('hex');
                     activeSessions.set(loginSessionId, user.id);
 
@@ -214,9 +214,10 @@ const server = http.createServer(async (req, res) => {
                     return res.end(JSON.stringify({ error: 'Name and new password are required' }))
                 }
 
-                const salt = crypto.randomBytes(16).toString('hex');
-                const hashedPassword = crypto.scryptSync(newPassword, salt, 64).toString('hex');
-                const finalPasswordString = `${salt}:${hashedPassword}`;
+                // const salt = crypto.randomBytes(16).toString('hex');
+                // const hashedPassword = crypto.scryptSync(newPassword, salt, 64).toString('hex');
+                // const finalPasswordString = `${salt}:${hashedPassword}`;
+                const finalPasswordString = hashPassword(newPassword);
 
                 const updateQuery = 'UPDATE users SET names = $1, password = $2 WHERE id = $3';
                 await pool.query(updateQuery, [newName, finalPasswordString, userId]);
@@ -292,4 +293,4 @@ function createCaptchaImage(text) {
     return svg;
 }
 
-const { generateCaptcha } = require('./utils.js');
+const { generateCaptcha, hashPassword, verifyPassword } = require('./utils.js')
